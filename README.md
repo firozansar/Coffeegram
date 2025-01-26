@@ -9,7 +9,6 @@
 [![Jetc.dev](https://img.shields.io/badge/jetc.dev-25-blue)](https://jetc.dev/issues/025.html)
 [![Hits-of-Code](https://hitsofcode.com/github/phansier/Coffeegram?branch=develop)](https://hitsofcode.com/github/phansier/Coffeegram/view?branch=develop)
 
-[Try WASM online](https://coffegram.beriukhov.tech/)
 <br>
 ## Android app in Jetpack Compose and MVI
 
