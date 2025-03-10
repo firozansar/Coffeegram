@@ -1,7 +1,7 @@
 [versions]
 targetSdk = "34"
 compileSdk = "35"
-minSdk = "24"
+minSdk = "26"
 wearMinSdk = "25"
 
 kotlin = "2.1.20-RC2" # https://github.com/JetBrains/kotlin/releases
