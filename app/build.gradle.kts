@@ -124,6 +124,10 @@ dependencies {
     implementation(libs.koin.android)
     implementation(libs.koin.compose) // lifecycleScope
 
+    implementation(libs.vico.compose)
+    implementation(libs.vico.compose.m3)
+    implementation(libs.vico.core)
+
     // Wearable
     implementation(libs.playServices.wearable)
     // for connectedNodes.await()

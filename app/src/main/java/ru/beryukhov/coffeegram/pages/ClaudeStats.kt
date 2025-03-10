@@ -2,20 +2,12 @@
 
 package ru.beryukhov.coffeegram.pages
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -25,13 +17,29 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.patrykandpatrick.vico.compose.axis.horizontal.rememberBottomAxis
+import com.patrykandpatrick.vico.compose.axis.vertical.rememberStartAxis
+import com.patrykandpatrick.vico.compose.chart.Chart
+import com.patrykandpatrick.vico.compose.chart.column.columnChart
+import com.patrykandpatrick.vico.compose.chart.line.lineChart
+import com.patrykandpatrick.vico.compose.chart.scroll.rememberChartScrollSpec
+import com.patrykandpatrick.vico.compose.component.shapeComponent
+import com.patrykandpatrick.vico.compose.component.textComponent
+import com.patrykandpatrick.vico.compose.legend.legendItem
+import com.patrykandpatrick.vico.compose.legend.verticalLegend
+import com.patrykandpatrick.vico.compose.style.ChartStyle
+import com.patrykandpatrick.vico.compose.style.ProvideChartStyle
+import com.patrykandpatrick.vico.core.chart.line.LineChart
+import com.patrykandpatrick.vico.core.component.shape.LineComponent
+import com.patrykandpatrick.vico.core.component.shape.Shapes
+import com.patrykandpatrick.vico.core.entry.ChartEntryModelProducer
+import com.patrykandpatrick.vico.core.entry.entryOf
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DayOfWeek
@@ -99,7 +107,25 @@ fun WeeklyCoffeeChart(coffeeState: DaysCoffeesState) {
         )
     }
 
-    val maxCoffeeCount = weekData.maxOfOrNull { it.totalCoffees } ?: 0
+    // Create chart entries
+    val chartEntryModelProducer = ChartEntryModelProducer(weekData.mapIndexed { index, data ->
+        entryOf(index.toFloat(), data.totalCoffees.toFloat())
+    })
+
+    // Create coffee type legend items
+    val legendItems = CoffeeType.entries.map { coffeeType ->
+        legendItem(
+            icon = shapeComponent(
+                shape = Shapes.pillShape,
+                color = getCoffeeTypeColor(coffeeType)
+            ),
+            label = textComponent(
+                color = MaterialTheme.colorScheme.onSurface,
+                textSize = 12.sp
+            ),
+            labelText = coffeeType.name
+        )
+    }
 
     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
         Text(
@@ -111,129 +137,34 @@ fun WeeklyCoffeeChart(coffeeState: DaysCoffeesState) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Custom bar chart for the week
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(300.dp)
-                .padding(
-                    start = 40.dp, // Space for y-axis labels
-                    end = 16.dp,
-                    top = 16.dp,
-                    bottom = 40.dp // Space for x-axis labels
-                )
-        ) {
-            // Draw chart background
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                // Draw grid lines
-                val yStep = size.height / (maxCoffeeCount + 1).coerceAtLeast(1)
-                val xStep = size.width / 7
-
-                // Horizontal grid lines
-                for (i in 0..maxCoffeeCount) {
-                    drawLine(
-                        color = Color.LightGray.copy(alpha = 0.5f),
-                        start = Offset(0f, size.height - i * yStep),
-                        end = Offset(size.width, size.height - i * yStep),
-                        strokeWidth = 1f
-                    )
-                }
-
-                // Draw bars
-                weekData.forEachIndexed { index, data ->
-                    val barWidth = xStep * 0.6f
-                    val barColor = when (index % 7) {
-                        0 -> Color(0xFF4285F4) // Blue
-                        1 -> Color(0xFFEA4335) // Red
-                        2 -> Color(0xFFFBBC05) // Yellow
-                        3 -> Color(0xFF34A853) // Green
-                        4 -> Color(0xFF8F6ED5) // Purple
-                        5 -> Color(0xFFF57C00) // Orange
-                        else -> Color(0xFF795548) // Brown
-                    }
-
-                    val barHeight = if (maxCoffeeCount > 0) {
-                        data.totalCoffees.toFloat() / maxCoffeeCount * size.height
-                    } else {
-                        0f
-                    }
-
-                    drawRect(
-                        color = barColor,
-                        topLeft = Offset(
-                            x = index * xStep + (xStep - barWidth) / 2,
-                            y = size.height - barHeight
-                        ),
-                        size = Size(barWidth, barHeight)
-                    )
-                }
-            }
-
-            // X-axis labels
-            Row(
+        // Vico chart style
+        ProvideChartStyle(rememberChartStyle()) {
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .align(Alignment.BottomCenter)
-                    .padding(top = 8.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                    .height(300.dp)
             ) {
-                weekData.forEach { data ->
-                    Text(
-                        text = data.dayName,
-                        style = MaterialTheme.typography.bodySmall,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.width(40.dp)
+                Chart(
+                    chart = columnChart(),
+                    model = chartEntryModelProducer.getModel(),
+                    startAxis = rememberStartAxis(),
+                    bottomAxis = rememberBottomAxis(
+                        valueFormatter = { value, _ ->
+                            weekData.getOrNull(value.toInt())?.dayName ?: ""
+                        }
                     )
-                }
-            }
-
-            // Y-axis labels
-            Column(
-                modifier = Modifier
-                    .height(260.dp)
-                    .align(Alignment.CenterStart)
-                    .padding(end = 8.dp),
-                verticalArrangement = Arrangement.SpaceBetween
-            ) {
-                for (i in maxCoffeeCount downTo 0) {
-                    Text(
-                        text = i.toString(),
-                        style = MaterialTheme.typography.bodySmall,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier.width(32.dp)
-                    )
-                }
+                )
             }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Legend for coffee types
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            CoffeeType.entries.forEach { coffeeType ->
-                Row(
-                    modifier = Modifier.padding(4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(16.dp)
-                            .background(
-                                color = getCoffeeTypeColor(coffeeType),
-                                shape = MaterialTheme.shapes.small
-                            )
-                    )
-                    Text(
-                        text = coffeeType.name,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
-        }
+        // Legend
+        verticalLegend(
+            items = legendItems,
+            iconSize = 16.dp,
+            iconPadding = 8.dp
+        )
     }
 }
 
@@ -288,7 +219,42 @@ fun AllTimeCoffeeChart(coffeeState: DaysCoffeesState) {
         }.sortedBy { it.label }
     }
 
-    val maxValue = aggregatedData.maxOfOrNull { it.totalCount } ?: 0
+    // Create chart entries
+    val chartEntryModelProducer = ChartEntryModelProducer(aggregatedData.mapIndexed { index, data ->
+        entryOf(index.toFloat(), data.totalCount.toFloat())
+    })
+
+    // Create coffee type distribution data
+    val typeDistribution = CoffeeType.entries.map { coffeeType ->
+        val total = coffeeState.value.values.sumOf {
+            it.coffeeCountMap[coffeeType] ?: 0
+        }
+
+        CoffeeTypeCount(
+            type = coffeeType,
+            count = total
+        )
+    }.sortedByDescending { it.count }
+
+    // Create type distribution chart entries
+    val typeChartEntryModelProducer = ChartEntryModelProducer(typeDistribution.mapIndexed { index, data ->
+        entryOf(index.toFloat(), data.count.toFloat())
+    })
+
+    // Create legend items
+    val legendItems = typeDistribution.take(5).map { data ->
+        legendItem(
+            icon = shapeComponent(
+                shape = Shapes.pillShape,
+                color = getCoffeeTypeColor(data.type)
+            ),
+            label = textComponent(
+                color = MaterialTheme.colorScheme.onSurface,
+                textSize = 12.sp
+            ),
+            labelText = "${data.type.name} (${data.count})"
+        )
+    }
 
     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
         Text(
@@ -300,125 +266,30 @@ fun AllTimeCoffeeChart(coffeeState: DaysCoffeesState) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Line chart
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(300.dp)
-                .padding(
-                    start = 40.dp, // Space for y-axis labels
-                    end = 16.dp,
-                    top = 16.dp,
-                    bottom = 40.dp // Space for x-axis labels
-                )
-        ) {
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                val xStep = if (aggregatedData.isNotEmpty()) {
-                    size.width / (aggregatedData.size - 1).coerceAtLeast(1)
-                } else {
-                    size.width
-                }
-
-                // Draw grid lines
-                for (i in 0..5) {
-                    val y = size.height - i * size.height / 5
-                    drawLine(
-                        color = Color.LightGray.copy(alpha = 0.5f),
-                        start = Offset(0f, y),
-                        end = Offset(size.width, y),
-                        strokeWidth = 1f
-                    )
-                }
-
-                // Draw line
-                if (aggregatedData.size > 1) {
-                    val points = aggregatedData.mapIndexed { index, data ->
-                        val x = index * xStep
-                        val y = if (maxValue > 0) {
-                            size.height - data.totalCount.toFloat() / maxValue * size.height
-                        } else {
-                            size.height
-                        }
-                        Offset(x, y)
-                    }
-
-                    for (i in 0 until points.size - 1) {
-                        drawLine(
-                            color = Color(0xFF4285F4),
-                            start = points[i],
-                            end = points[i + 1],
-                            strokeWidth = 3f
-                        )
-                    }
-
-                    // Draw points
-                    points.forEach { point ->
-                        drawCircle(
-                            color = Color(0xFF4285F4),
-                            radius = 6f,
-                            center = point
-                        )
-                    }
-                }
-            }
-
-            // X-axis labels
-            Row(
+        // Line chart with Vico
+        ProvideChartStyle(rememberChartStyle()) {
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .align(Alignment.BottomCenter)
-                    .padding(top = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .height(300.dp)
             ) {
-                // Show subset of labels to avoid crowding
-                val labelIndices = if (aggregatedData.size <= 6) {
-                    aggregatedData.indices.toList()
-                } else {
-                    val step = aggregatedData.size / 6
-                    aggregatedData.indices.step(step).toList()
-                }
-
-                // Add spacing for labels
-                Box(modifier = Modifier.weight(1f)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        labelIndices.forEach { index ->
-                            Text(
-                                text = aggregatedData.getOrNull(index)?.label ?: "",
-                                style = MaterialTheme.typography.bodySmall,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.width(48.dp)
-                            )
+                Chart(
+                    chart = lineChart(),
+                    model = chartEntryModelProducer.getModel(),
+                    startAxis = rememberStartAxis(),
+                    bottomAxis = rememberBottomAxis(
+                        valueFormatter = { value, _ ->
+                            aggregatedData.getOrNull(value.toInt())?.label ?: ""
                         }
-                    }
-                }
-            }
-
-            // Y-axis labels
-            Column(
-                modifier = Modifier
-                    .height(260.dp)
-                    .align(Alignment.CenterStart)
-                    .padding(end = 8.dp),
-                verticalArrangement = Arrangement.SpaceBetween
-            ) {
-                for (i in 5 downTo 0) {
-                    val value = maxValue * i / 5
-                    Text(
-                        text = value.toString(),
-                        style = MaterialTheme.typography.bodySmall,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier.width(32.dp)
-                    )
-                }
+                    ),
+                    chartScrollSpec = rememberChartScrollSpec(isScrollEnabled = aggregatedData.size > 7)
+                )
             }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Coffee type distribution (stacked bar)
+        // Coffee type distribution
         Text(
             text = "Coffee Type Distribution",
             style = MaterialTheme.typography.headlineSmall,
@@ -428,76 +299,76 @@ fun AllTimeCoffeeChart(coffeeState: DaysCoffeesState) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Simplified coffee type distribution using stacked elements
-        val typeDistribution = CoffeeType.entries.map { coffeeType ->
-            val total = coffeeState.value.values.sumOf {
-                it.coffeeCountMap[coffeeType] ?: 0
-            }
-
-            CoffeeTypeCount(
-                type = coffeeType,
-                count = total
-            )
-        }.sortedByDescending { it.count }
-
-        val totalCount = typeDistribution.sumOf { it.count }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(60.dp)
-                .padding(vertical = 8.dp)
-        ) {
-            typeDistribution.forEach { item ->
-                if (item.count > 0) {
-                    val percentage = if (totalCount > 0) {
-                        item.count.toFloat() / totalCount
-                    } else {
-                        0f
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .weight(percentage)
-                            .fillMaxHeight()
-                            .background(getCoffeeTypeColor(item.type))
+        // Column chart for type distribution
+        ProvideChartStyle(rememberChartStyle()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+            ) {
+                Chart(
+                    chart = columnChart(),
+                    model = typeChartEntryModelProducer.getModel(),
+                    startAxis = rememberStartAxis(),
+                    bottomAxis = rememberBottomAxis(
+                        valueFormatter = { value, _ ->
+                            typeDistribution.getOrNull(value.toInt())?.type?.name?.take(3) ?: ""
+                        }
                     )
-                }
+                )
             }
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         // Legend
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            typeDistribution.take(5).forEach { item ->
-                if (item.count > 0) {
-                    Row(
-                        modifier = Modifier.padding(4.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(16.dp)
-                                .background(
-                                    color = getCoffeeTypeColor(item.type),
-                                    shape = MaterialTheme.shapes.small
-                                )
-                        )
-                        Text(
-                            text = "${item.type.name} (${item.count})",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                }
-            }
-        }
+        verticalLegend(
+            items = legendItems,
+            iconSize = 16.dp,
+            iconPadding = 8.dp
+        )
     }
 }
 
-// Helper classes
+// Helper functions and classes
+
+@Composable
+private fun rememberChartStyle(): ChartStyle {
+    val colors = CoffeeType.entries.map { getCoffeeTypeColor(it) }
+    val onSurface = MaterialTheme.colorScheme.onSurface
+    val primary = MaterialTheme.colorScheme.primary
+    val surface = MaterialTheme.colorScheme.surface
+    return remember {
+        ChartStyle(
+            axis = ChartStyle.Axis(
+                axisLabelColor = onSurface,
+                axisGuidelineColor = onSurface.copy(alpha = 0.1f),
+                axisLineColor = onSurface.copy(alpha = 0.3f)
+            ),
+            columnChart = ChartStyle.ColumnChart(
+                columns = colors.map { color ->
+                    LineComponent(
+                        color = color.toArgb(),
+                        thicknessDp = 8f
+                    )
+                }
+            ),
+            lineChart = ChartStyle.LineChart(
+                lines = listOf(
+                    LineChart.LineSpec(
+                        lineColor = primary.toArgb(),
+                        lineBackgroundShader = null,
+                        pointSizeDp = 8f,
+//                        pointColor = MaterialTheme.colorScheme.primary,
+//                        pointInnerColor = MaterialTheme.colorScheme.surface
+                    )
+                )
+            ),
+            marker = ChartStyle.Marker(),
+            elevationOverlayColor = surface
+        )
+    }
+}
 
 data class WeeklyChartData(
     val date: LocalDate,
