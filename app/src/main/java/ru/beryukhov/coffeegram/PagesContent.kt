@@ -6,10 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Create
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -29,13 +25,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.ktor.util.reflect.instanceOf
 import org.koin.compose.koinInject
 import ru.beryukhov.coffeegram.app_ui.CoffeegramTheme
-import ru.beryukhov.coffeegram.model.NavigationIntent
 import ru.beryukhov.coffeegram.model.NavigationState
 import ru.beryukhov.coffeegram.model.NavigationStore
 import ru.beryukhov.coffeegram.model.ThemeState
 import ru.beryukhov.coffeegram.model.ThemeStore
+import ru.beryukhov.coffeegram.model.getNavBarItems
 import ru.beryukhov.coffeegram.pages.CoffeeListAppBar
 import ru.beryukhov.coffeegram.pages.CoffeeListPage
 import ru.beryukhov.coffeegram.pages.MapAppBar
@@ -75,6 +72,8 @@ fun PagesContent(
         }
     )
 
+    val navBarItems = remember(showMap) { getNavBarItems(showMap) }
+
     CoffeegramTheme(
         themeState = themeState()
     ) {
@@ -95,7 +94,11 @@ fun PagesContent(
         }, snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
         }) {
-            Column(modifier = Modifier.padding(it).testTag(currentNavigationState.mapTestTag())) {
+            Column(
+                modifier = Modifier
+                    .padding(it)
+                    .testTag(currentNavigationState.mapTestTag())
+            ) {
                 Spacer(
                     Modifier
                         .padding(top = topPadding)
@@ -116,37 +119,18 @@ fun PagesContent(
                     is NavigationState.MapPage -> MapPage()
                 }
                 NavigationBar {
-                    NavigationBarItem(selected = currentNavigationState is NavigationState.TablePage, onClick = {
-                        navigationStore.newIntent(
-                            NavigationIntent.ReturnToTablePage
+                    navBarItems.forEach { item ->
+                        NavigationBarItem(
+                            selected = currentNavigationState.instanceOf(item.page),
+                            onClick = { navigationStore.newIntent(item.intent) },
+                            label = { Text(stringResource(id = item.title)) },
+                            icon = {
+                                Icon(
+                                    imageVector = item.icon,
+                                    contentDescription = "",
+                                )
+                            }
                         )
-                    }, label = { Text(stringResource(id = R.string.calendar)) }, icon = {
-                        Icon(
-                            imageVector = Icons.Default.Create,
-                            contentDescription = "",
-                        )
-                    })
-                    NavigationBarItem(selected = currentNavigationState is NavigationState.SettingsPage, onClick = {
-                        navigationStore.newIntent(
-                            NavigationIntent.ToSettingsPage
-                        )
-                    }, label = { Text(stringResource(id = R.string.settings)) }, icon = {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "",
-                        )
-                    })
-                    if (showMap) {
-                        NavigationBarItem(selected = currentNavigationState is NavigationState.MapPage, onClick = {
-                            navigationStore.newIntent(
-                                NavigationIntent.ToMapPage
-                            )
-                        }, label = { Text(stringResource(id = R.string.map_short)) }, icon = {
-                            Icon(
-                                imageVector = Icons.Default.LocationOn,
-                                contentDescription = "",
-                            )
-                        })
                     }
                 }
             }
