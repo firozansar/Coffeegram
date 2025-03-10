@@ -3,6 +3,7 @@ package ru.beryukhov.coffeegram.model
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -22,6 +23,14 @@ private val calendar = NavBarItem(
     R.string.calendar,
     Icons.Default.Create
 )
+
+private val stats = NavBarItem(
+    NavigationState.StatsPage::class,
+    NavigationIntent.ToStatsPage,
+    R.string.stats,
+    Icons.Default.Info
+)
+
 private val settings = NavBarItem(
     NavigationState.SettingsPage::class,
     NavigationIntent.ToSettingsPage,
@@ -37,7 +46,7 @@ private val specialty = NavBarItem(
 
 internal fun getNavBarItems(showMap: Boolean) =
     if (showMap) {
-        persistentListOf(calendar, settings, specialty)
+        persistentListOf(calendar, stats, settings, specialty)
     } else {
-        persistentListOf(calendar, settings)
+        persistentListOf(calendar, stats, settings)
     }

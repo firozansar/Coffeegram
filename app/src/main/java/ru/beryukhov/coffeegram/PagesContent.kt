@@ -39,6 +39,8 @@ import ru.beryukhov.coffeegram.pages.MapAppBar
 import ru.beryukhov.coffeegram.pages.MapPage
 import ru.beryukhov.coffeegram.pages.SettingsAppBar
 import ru.beryukhov.coffeegram.pages.SettingsPage
+import ru.beryukhov.coffeegram.pages.StatsAppBar
+import ru.beryukhov.coffeegram.pages.StatsPage
 import ru.beryukhov.coffeegram.pages.TableAppBar
 import ru.beryukhov.coffeegram.pages.TablePage
 import ru.beryukhov.date_time_utils.nowYM
@@ -86,7 +88,7 @@ fun PagesContent(
                 is NavigationState.CoffeeListPage -> CoffeeListAppBar(
                     localDate = currentNavigationState.date
                 )
-
+                is NavigationState.StatsPage -> StatsAppBar()
                 is NavigationState.SettingsPage -> SettingsAppBar()
 
                 is NavigationState.MapPage -> MapAppBar()
@@ -111,6 +113,7 @@ fun PagesContent(
                     is NavigationState.CoffeeListPage -> CoffeeListPage(
                         localDate = currentNavigationState.date
                     )
+                    is NavigationState.StatsPage -> StatsPage()
                     is NavigationState.SettingsPage -> SettingsPage(
                         themeStore = koinInject(),
                         snackbarHostState = snackbarHostState,
