@@ -11,7 +11,7 @@ android {
     defaultConfig {
         // NOTE: This must be the same in the phone app and the wear app for the capabilities API
         applicationId = "ru.beryukhov.coffeegram"
-        minSdk = libs.versions.wearMinSdk.get().toInt()
+        minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
