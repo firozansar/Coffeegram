@@ -22,6 +22,7 @@ import ru.beryukhov.coffeegram.model.ThemeStore
 import ru.beryukhov.coffeegram.pages.AppWidgetViewModelImpl
 import ru.beryukhov.coffeegram.pages.CoffeeListViewModelImpl
 import ru.beryukhov.coffeegram.pages.MapPageViewModelImpl
+import ru.beryukhov.coffeegram.pages.StatsPageViewModelImpl
 import ru.beryukhov.coffeegram.pages.TablePageViewModelImpl
 import ru.beryukhov.coffeegram.repository.CoffeeStorage
 import ru.beryukhov.coffeegram.repository.ThemeDataStoreProtoStorage
@@ -67,6 +68,7 @@ internal val appModule = module {
     single { NavigationStore() }
     viewModel { CoffeeListViewModelImpl(daysCoffeesStore = get(), navigationStore = get()) }
     viewModel { TablePageViewModelImpl(daysCoffeesStore = get(), navigationStore = get()) }
+    viewModel { StatsPageViewModelImpl(daysCoffeesStore = get()) }
     viewModel { MapPageViewModelImpl() }
     viewModel { AppWidgetViewModelImpl(daysCoffeesStore = get()) }
 }

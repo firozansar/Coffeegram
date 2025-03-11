@@ -25,6 +25,7 @@ class NavigationStore(val yearMonth: YearMonth = nowYM()) : InMemoryStore<Naviga
                 setYearMonth(yearMonth = intent.yearMonth)
             )
             NavigationIntent.ReturnToTablePage -> NavigationState.TablePage(currentYearMonth.value)
+            NavigationIntent.ToStatsPage -> NavigationState.StatsPage
             NavigationIntent.ToSettingsPage -> NavigationState.SettingsPage
             NavigationIntent.ToMapPage -> NavigationState.MapPage
         }
@@ -40,6 +41,7 @@ sealed interface NavigationIntent {
     data class OpenCoffeeListPage(val dayOfMonth: Int) : NavigationIntent
     data class SetYearMonth(val yearMonth: YearMonth) : NavigationIntent
     data object ReturnToTablePage : NavigationIntent
+    data object ToStatsPage : NavigationIntent
     data object ToSettingsPage : NavigationIntent
     data object ToMapPage : NavigationIntent
 }
@@ -48,12 +50,14 @@ sealed interface NavigationState {
     fun mapTestTag(): String = when (this) {
         is CoffeeListPage -> "CoffeeListScreen"
         MapPage -> "MapScreen"
+        StatsPage -> "StatsScreen"
         SettingsPage -> "SettingsScreen"
         is TablePage -> "TableScreen"
     }
 
     class TablePage(val yearMonth: YearMonth) : NavigationState
     data class CoffeeListPage(val date: LocalDate) : NavigationState
+    data object StatsPage : NavigationState
     data object SettingsPage : NavigationState
     data object MapPage : NavigationState
     companion object {
