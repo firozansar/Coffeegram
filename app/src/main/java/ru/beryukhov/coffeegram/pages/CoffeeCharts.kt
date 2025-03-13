@@ -19,19 +19,20 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
-import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
-import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
-import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
-import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
-import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.multiplatform.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.multiplatform.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.multiplatform.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.multiplatform.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.multiplatform.cartesian.data.columnSeries
+import com.patrykandpatrick.vico.multiplatform.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.multiplatform.cartesian.layer.rememberColumnCartesianLayer
+import com.patrykandpatrick.vico.multiplatform.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.multiplatform.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.multiplatform.common.ProvideVicoTheme
+import com.patrykandpatrick.vico.multiplatform.m3.common.rememberM3VicoTheme
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.datetime.Clock
@@ -64,10 +65,11 @@ fun CoffeeCharts(coffeeState: DaysCoffeesState, modifier: Modifier = Modifier) {
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        when (selectedTabIndex) {
-            0 -> WeeklyCoffeeChart(coffeeState)
-            1 -> AllTimeCoffeeChart(coffeeState)
+        ProvideVicoTheme(rememberM3VicoTheme()) {
+            when (selectedTabIndex) {
+                0 -> WeeklyCoffeeChart(coffeeState)
+                1 -> AllTimeCoffeeChart(coffeeState)
+            }
         }
     }
 }
@@ -81,19 +83,18 @@ fun WeeklyCoffeeChart(coffeeState: DaysCoffeesState) {
     // Filter data for current week and aggregate by day
     val weekData = weeklyChartData(startOfWeek, coffeeState)
     val entries = entries(weekData)
-    // Create chart entries
-    val modelProducer = remember { CartesianChartModelProducer() }
-    LaunchedEffect(Unit) {
-        modelProducer.runTransaction {
-            columnSeries { series(x = entries.first, y = entries.second) }
-        }
-    }
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
     ) {
+        // Create chart entries
+        val modelProducer = remember { CartesianChartModelProducer() }
+        LaunchedEffect(Unit) {
+            modelProducer.runTransaction {
+                columnSeries { series(x = entries.first, y = entries.second) }
+            }
+        }
         Text(
             text = "Coffee Consumption This Week",
             style = MaterialTheme.typography.headlineSmall,
@@ -116,7 +117,6 @@ fun WeeklyCoffeeChart(coffeeState: DaysCoffeesState) {
             modelProducer = modelProducer,
             modifier = Modifier,
         )
-        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
@@ -238,6 +238,8 @@ private fun ColumnChart(coffeeState: DaysCoffeesState) {
         }
     }
 
+    val names = typeDistribution.map { stringResource(it.type.nameId) }
+
     // Column chart for type distribution
     CartesianChartHost(
         chart =
@@ -245,8 +247,9 @@ private fun ColumnChart(coffeeState: DaysCoffeesState) {
                 rememberColumnCartesianLayer(),
                 startAxis = VerticalAxis.rememberStart(),
                 bottomAxis = HorizontalAxis.rememberBottom(
+                    labelRotationDegrees = 90f,
                     valueFormatter = { _, value, _ ->
-                        typeDistribution.getOrNull(value.toInt())?.type?.name?.take(3) ?: ""
+                        names.getOrNull(value.toInt()) ?: ""
                     }
                 ),
             ),
