@@ -10,6 +10,9 @@ detekt:
 autodetekt:
 	$(path)gradlew detektAll --auto-correct --continue
 
+testApp:
+	./gradlew :app:testDebugUnitTest $(params)
+
 buildApp:
 	./gradlew :app:assembleDebug $(params)
 
@@ -26,7 +29,7 @@ buildDesktop:
 testCommon:
 	./gradlew :cmp-common:testDebugUnitTest $(params)
 
-localCheck: detekt buildApp buildWear buildAndroid testCommon
+localCheck: detekt testApp buildApp buildWear buildAndroid testCommon
 
 compose_metrics:
 	$(path)gradlew :app:assembleRelease \-Pmyapp.enableComposeCompilerReports=true

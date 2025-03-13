@@ -30,7 +30,7 @@ glance = "1.1.1" # https://developer.android.com/jetpack/androidx/releases/glanc
 sqldelight = "2.0.2" # https://github.com/cashapp/sqldelight/releases
 
 material = "1.12.0" # https://github.com/material-components/material-components-android
-vico = "1.12.0"
+vico = "2.1.0-beta.2"
 protobuf = "4.30.0"
 
 [libraries]
@@ -99,8 +99,8 @@ material = { module = "com.google.android.material:material", version.ref = "mat
 protobuf-javalite = { module = "com.google.protobuf:protobuf-javalite", version.ref = "protobuf" }  # https://mvnrepository.com/artifact/com.google.protobuf/protobuf-javalite
 playServices-wearable = "com.google.android.gms:play-services-wearable:19.0.0" # https://mvnrepository.com/artifact/com.google.android.gms/play-services-wearable
 kotlinx-immutableCollections = "org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.8" # https://github.com/Kotlin/kotlinx.collections.immutable
-vico-compose = { module = "com.patrykandpatrick.vico:compose", version.ref = "vico" }
-vico-compose-m3 = { module = "com.patrykandpatrick.vico:compose-m3", version.ref = "vico" }
+vico-multiplatform = { module = "com.patrykandpatrick.vico:multiplatform", version.ref = "vico" }
+vico-multiplatform-m3 = { module = "com.patrykandpatrick.vico:multiplatform-m3", version.ref = "vico" }
 
 lottie-compose = "com.airbnb.android:lottie-compose:6.6.3" # https://github.com/airbnb/lottie-android
 

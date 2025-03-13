@@ -124,8 +124,8 @@ dependencies {
     implementation(libs.koin.android)
     implementation(libs.koin.compose) // lifecycleScope
 
-    implementation(libs.vico.compose)
-    implementation(libs.vico.compose.m3)
+    implementation(libs.vico.multiplatform)
+    implementation(libs.vico.multiplatform.m3)
 
     // Wearable
     implementation(libs.playServices.wearable)
@@ -136,6 +136,10 @@ dependencies {
 
     androidTestImplementation(libs.compose.uiTestJunit4)
     androidTestImplementation(libs.kakao.compose)
+
+    testImplementation(libs.kotlin.test)
+    testImplementation(libs.kotlin.test.annotations)
+    testImplementation(libs.kotlin.test.junit)
 }
 
 protobuf {
