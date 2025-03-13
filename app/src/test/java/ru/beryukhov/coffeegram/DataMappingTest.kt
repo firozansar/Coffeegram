@@ -6,6 +6,7 @@ import ru.beryukhov.coffeegram.data.CoffeeType
 import ru.beryukhov.coffeegram.data.CoffeeType.Americano
 import ru.beryukhov.coffeegram.data.CoffeeType.Cappuccino
 import ru.beryukhov.coffeegram.data.CoffeeType.Latte
+import ru.beryukhov.coffeegram.data.CoffeeTypeWithCount
 import ru.beryukhov.coffeegram.data.DayCoffee
 import ru.beryukhov.coffeegram.data.withEmpty
 import ru.beryukhov.coffeegram.model.DaysCoffeesState
@@ -140,9 +141,9 @@ class DataMappingTest {
         )
         val actual = map.withEmpty()
         val expected = listOf(
-            Cappuccino to 2,
-            Latte to 3,
-            Americano to 0
+            CoffeeTypeWithCount(Cappuccino, 2),
+            CoffeeTypeWithCount(Latte, 3),
+            CoffeeTypeWithCount(Americano, 0),
         )
         assertEquals(expected, actual)
     }

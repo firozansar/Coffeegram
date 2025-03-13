@@ -22,23 +22,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.patrykandpatrick.vico.compose.axis.horizontal.rememberBottomAxis
 import com.patrykandpatrick.vico.compose.axis.vertical.rememberStartAxis
 import com.patrykandpatrick.vico.compose.chart.Chart
 import com.patrykandpatrick.vico.compose.chart.column.columnChart
 import com.patrykandpatrick.vico.compose.chart.line.lineChart
 import com.patrykandpatrick.vico.compose.chart.scroll.rememberChartScrollSpec
-import com.patrykandpatrick.vico.compose.component.shapeComponent
-import com.patrykandpatrick.vico.compose.component.textComponent
-import com.patrykandpatrick.vico.compose.legend.legendItem
-import com.patrykandpatrick.vico.compose.legend.verticalLegend
 import com.patrykandpatrick.vico.compose.style.ChartStyle
 import com.patrykandpatrick.vico.compose.style.ProvideChartStyle
 import com.patrykandpatrick.vico.core.chart.line.LineChart
 import com.patrykandpatrick.vico.core.component.shape.LineComponent
-import com.patrykandpatrick.vico.core.component.shape.Shapes
 import com.patrykandpatrick.vico.core.entry.ChartEntryModelProducer
+import com.patrykandpatrick.vico.core.entry.FloatEntry
 import com.patrykandpatrick.vico.core.entry.entryOf
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DatePeriod
@@ -83,49 +78,12 @@ fun WeeklyCoffeeChart(coffeeState: DaysCoffeesState) {
     // Get dates for the current week (Monday to Sunday)
     val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
     val startOfWeek = today.minus(DatePeriod(days = today.dayOfWeek.ordinal))
-    val endOfWeek = startOfWeek.plus(DatePeriod(days = 6)) // Sunday
 
     // Filter data for current week and aggregate by day
-    val weekData = (0..6).map { dayOffset ->
-        val date = startOfWeek.plus(DatePeriod(days = dayOffset))
-        val dayCoffee = coffeeState.value[date] ?: DayCoffee()
-        val totalForDay = dayCoffee.coffeeCountMap.values.sum()
-
-        WeeklyChartData(
-            date = date,
-            dayName = when (date.dayOfWeek) {
-                DayOfWeek.MONDAY -> "Mon"
-                DayOfWeek.TUESDAY -> "Tue"
-                DayOfWeek.WEDNESDAY -> "Wed"
-                DayOfWeek.THURSDAY -> "Thu"
-                DayOfWeek.FRIDAY -> "Fri"
-                DayOfWeek.SATURDAY -> "Sat"
-                DayOfWeek.SUNDAY -> "Sun"
-            },
-            totalCoffees = totalForDay,
-            coffeesByType = dayCoffee.coffeeCountMap
-        )
-    }
+    val weekData = weeklyChartData(startOfWeek, coffeeState)
 
     // Create chart entries
-    val chartEntryModelProducer = ChartEntryModelProducer(weekData.mapIndexed { index, data ->
-        entryOf(index.toFloat(), data.totalCoffees.toFloat())
-    })
-
-    // Create coffee type legend items
-    val legendItems = CoffeeType.entries.map { coffeeType ->
-        legendItem(
-            icon = shapeComponent(
-                shape = Shapes.pillShape,
-                color = getCoffeeTypeColor(coffeeType)
-            ),
-            label = textComponent(
-                color = MaterialTheme.colorScheme.onSurface,
-                textSize = 12.sp
-            ),
-            labelText = coffeeType.name
-        )
-    }
+    val chartEntryModelProducer = ChartEntryModelProducer(floatEntries(weekData))
 
     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
         Text(
@@ -158,15 +116,36 @@ fun WeeklyCoffeeChart(coffeeState: DaysCoffeesState) {
         }
 
         Spacer(modifier = Modifier.height(24.dp))
-
-        // Legend
-        verticalLegend(
-            items = legendItems,
-            iconSize = 16.dp,
-            iconPadding = 8.dp
-        )
     }
 }
+
+internal fun weeklyChartData(
+    startOfWeek: LocalDate,
+    coffeeState: DaysCoffeesState
+) = (0..6).map { dayOffset ->
+    val date = startOfWeek.plus(DatePeriod(days = dayOffset))
+    val dayCoffee = coffeeState.value[date] ?: DayCoffee()
+    val totalForDay = dayCoffee.coffeeCountMap.values.sum()
+
+    WeeklyChartData(
+        date = date,
+        dayName = when (date.dayOfWeek) {
+            DayOfWeek.MONDAY -> "Mon"
+            DayOfWeek.TUESDAY -> "Tue"
+            DayOfWeek.WEDNESDAY -> "Wed"
+            DayOfWeek.THURSDAY -> "Thu"
+            DayOfWeek.FRIDAY -> "Fri"
+            DayOfWeek.SATURDAY -> "Sat"
+            DayOfWeek.SUNDAY -> "Sun"
+        },
+        totalCoffees = totalForDay,
+    )
+}
+
+internal fun floatEntries(weekData: List<WeeklyChartData>): List<FloatEntry> =
+    weekData.mapIndexed { index, data ->
+        entryOf(index.toFloat(), data.totalCoffees.toFloat())
+    }
 
 @Composable
 fun AllTimeCoffeeChart(coffeeState: DaysCoffeesState) {
@@ -241,21 +220,6 @@ fun AllTimeCoffeeChart(coffeeState: DaysCoffeesState) {
         entryOf(index.toFloat(), data.count.toFloat())
     })
 
-    // Create legend items
-    val legendItems = typeDistribution.take(5).map { data ->
-        legendItem(
-            icon = shapeComponent(
-                shape = Shapes.pillShape,
-                color = getCoffeeTypeColor(data.type)
-            ),
-            label = textComponent(
-                color = MaterialTheme.colorScheme.onSurface,
-                textSize = 12.sp
-            ),
-            labelText = "${data.type.name} (${data.count})"
-        )
-    }
-
     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
         Text(
             text = "Coffee Consumption Over Time",
@@ -320,13 +284,6 @@ fun AllTimeCoffeeChart(coffeeState: DaysCoffeesState) {
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        // Legend
-        verticalLegend(
-            items = legendItems,
-            iconSize = 16.dp,
-            iconPadding = 8.dp
-        )
     }
 }
 
@@ -359,8 +316,6 @@ private fun rememberChartStyle(): ChartStyle {
                         lineColor = primary.toArgb(),
                         lineBackgroundShader = null,
                         pointSizeDp = 8f,
-//                        pointColor = MaterialTheme.colorScheme.primary,
-//                        pointInnerColor = MaterialTheme.colorScheme.surface
                     )
                 )
             ),
@@ -374,7 +329,6 @@ data class WeeklyChartData(
     val date: LocalDate,
     val dayName: String,
     val totalCoffees: Int,
-    val coffeesByType: Map<CoffeeType, Int>
 )
 
 data class YearMonth(val year: Int, val month: Month) {
