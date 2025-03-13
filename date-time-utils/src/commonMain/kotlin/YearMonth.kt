@@ -10,7 +10,7 @@ import kotlinx.datetime.number
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 
-data class YearMonth(val year: Int, val month: Month) {
+data class YearMonth(val year: Int, val month: Month) : Comparable<YearMonth> {
 
     fun plusMonths(monthsToAdd: Int): YearMonth {
         if (monthsToAdd == 0) {
@@ -36,24 +36,18 @@ data class YearMonth(val year: Int, val month: Month) {
     fun lengthOfMonth(): Int {
         return month.days(isLeapYear(year))
     }
+
+    override fun compareTo(other: YearMonth): Int {
+        return toTotalMonths().compareTo(other.toTotalMonths())
+    }
+
+    override fun toString(): String {
+        return "${month.name.take(3)} $year"
+    }
 }
 
 fun getFullMonthName(month: Month): String =
-    when (month) {
-        Month.JANUARY -> "JANUARY"
-        Month.FEBRUARY -> "FEBRUARY"
-        Month.MARCH -> "MARCH"
-        Month.APRIL -> "APRIL"
-        Month.MAY -> "MAY"
-        Month.JUNE -> "JUNE"
-        Month.JULY -> "JULY"
-        Month.AUGUST -> "AUGUST"
-        Month.SEPTEMBER -> "SEPTEMBER"
-        Month.OCTOBER -> "OCTOBER"
-        Month.NOVEMBER -> "NOVEMBER"
-        Month.DECEMBER -> "DECEMBER"
-        else -> ""
-    }.lowercase().replaceFirstChar { it.titlecase() }
+    month.name.lowercase().replaceFirstChar { it.titlecase() }
 
 fun nowYM(): YearMonth {
     val ld = nowLD()
@@ -83,6 +77,7 @@ private fun Month.days(leapYear: Boolean): Int =
         Month.JUNE,
         Month.SEPTEMBER,
         Month.NOVEMBER -> 30
+
         else -> 31
     }
 
