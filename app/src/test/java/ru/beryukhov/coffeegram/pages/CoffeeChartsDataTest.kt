@@ -1,6 +1,5 @@
 package ru.beryukhov.coffeegram.pages
 
-import com.patrykandpatrick.vico.core.entry.FloatEntry
 import kotlinx.datetime.LocalDate
 import ru.beryukhov.coffeegram.data.CoffeeType
 import ru.beryukhov.coffeegram.data.DayCoffee
@@ -8,7 +7,7 @@ import ru.beryukhov.coffeegram.model.DaysCoffeesState
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class ClaudeStatsTest {
+class CoffeeChartsDataTest {
 
     @Test
     fun testWeeklyChartData() {
@@ -35,17 +34,9 @@ class ClaudeStatsTest {
             actual = actualData
         )
 
-        val actualFloatEntries = floatEntries(actualData)
+        val actualFloatEntries = entries(actualData)
         assertEquals(
-            expected = listOf<FloatEntry>(
-                FloatEntry(x = 0f, y = 3f),
-                FloatEntry(x = 1f, y = 4f),
-                FloatEntry(x = 2f, y = 0f),
-                FloatEntry(x = 3f, y = 0f),
-                FloatEntry(x = 4f, y = 0f),
-                FloatEntry(x = 5f, y = 0f),
-                FloatEntry(x = 6f, y = 0f),
-            ),
+            expected = (0..6).toList() to listOf(3, 4, 0, 0, 0, 0, 0),
             actual = actualFloatEntries
         )
     }

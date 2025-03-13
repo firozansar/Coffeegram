@@ -13,27 +13,27 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.patrykandpatrick.vico.compose.axis.horizontal.rememberBottomAxis
-import com.patrykandpatrick.vico.compose.axis.vertical.rememberStartAxis
-import com.patrykandpatrick.vico.compose.chart.Chart
-import com.patrykandpatrick.vico.compose.chart.column.columnChart
-import com.patrykandpatrick.vico.compose.chart.line.lineChart
-import com.patrykandpatrick.vico.compose.chart.scroll.rememberChartScrollSpec
-import com.patrykandpatrick.vico.compose.style.ChartStyle
-import com.patrykandpatrick.vico.compose.style.ProvideChartStyle
-import com.patrykandpatrick.vico.core.chart.line.LineChart
-import com.patrykandpatrick.vico.core.component.shape.LineComponent
-import com.patrykandpatrick.vico.core.entry.ChartEntryModelProducer
-import com.patrykandpatrick.vico.core.entry.FloatEntry
-import com.patrykandpatrick.vico.core.entry.entryOf
+import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
+import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DayOfWeek
@@ -80,9 +80,14 @@ fun WeeklyCoffeeChart(coffeeState: DaysCoffeesState) {
 
     // Filter data for current week and aggregate by day
     val weekData = weeklyChartData(startOfWeek, coffeeState)
-
+    val entries = entries(weekData)
     // Create chart entries
-    val chartEntryModelProducer = ChartEntryModelProducer(floatEntries(weekData))
+    val modelProducer = remember { CartesianChartModelProducer() }
+    LaunchedEffect(Unit) {
+        modelProducer.runTransaction {
+            columnSeries { series(x = entries.first, y = entries.second) }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -98,26 +103,19 @@ fun WeeklyCoffeeChart(coffeeState: DaysCoffeesState) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Vico chart style
-        ProvideChartStyle(rememberChartStyle()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(300.dp)
-            ) {
-                Chart(
-                    chart = columnChart(),
-                    model = chartEntryModelProducer.getModel(),
-                    startAxis = rememberStartAxis(),
-                    bottomAxis = rememberBottomAxis(
-                        valueFormatter = { value, _ ->
-                            weekData.getOrNull(value.toInt())?.dayName ?: ""
-                        }
-                    )
-                )
-            }
-        }
-
+        CartesianChartHost(
+            chart = rememberCartesianChart(
+                rememberColumnCartesianLayer(),
+                startAxis = VerticalAxis.rememberStart(),
+                bottomAxis = HorizontalAxis.rememberBottom(
+                    valueFormatter = { _, value, _ ->
+                        weekData.getOrNull(value.toInt())?.dayName ?: ""
+                    }
+                ),
+            ),
+            modelProducer = modelProducer,
+            modifier = Modifier,
+        )
         Spacer(modifier = Modifier.height(24.dp))
     }
 }
@@ -145,10 +143,10 @@ internal fun weeklyChartData(
     )
 }
 
-internal fun floatEntries(weekData: List<WeeklyChartData>): List<FloatEntry> =
+internal fun entries(weekData: List<WeeklyChartData>): Pair<List<Int>, List<Int>> =
     weekData.mapIndexed { index, data ->
-        entryOf(index.toFloat(), data.totalCoffees.toFloat())
-    }
+        index to data.totalCoffees
+    }.unzip()
 
 @Composable
 fun AllTimeCoffeeChart(coffeeState: DaysCoffeesState) {
@@ -183,30 +181,6 @@ fun AllTimeCoffeeChart(coffeeState: DaysCoffeesState) {
         dailyAggregation(coffeeState)
     }
 
-    // Create chart entries
-    val chartEntryModelProducer = ChartEntryModelProducer(
-        aggregatedData.mapIndexed { index: Int, data: AggregatedData ->
-            entryOf(index.toFloat(), data.totalCount.toFloat())
-        }
-    )
-
-    // Create coffee type distribution data
-    val typeDistribution = CoffeeType.entries.map { coffeeType ->
-        val total = coffeeState.value.values.sumOf {
-            it.coffeeCountMap[coffeeType] ?: 0
-        }
-
-        CoffeeTypeCount(
-            type = coffeeType,
-            count = total
-        )
-    }.sortedByDescending { it.count }
-
-    // Create type distribution chart entries
-    val typeChartEntryModelProducer = ChartEntryModelProducer(typeDistribution.mapIndexed { index, data ->
-        entryOf(index.toFloat(), data.count.toFloat())
-    })
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -220,27 +194,7 @@ fun AllTimeCoffeeChart(coffeeState: DaysCoffeesState) {
         )
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        // Line chart with Vico
-        ProvideChartStyle(rememberChartStyle()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(300.dp)
-            ) {
-                Chart(
-                    chart = lineChart(),
-                    model = chartEntryModelProducer.getModel(),
-                    startAxis = rememberStartAxis(),
-                    bottomAxis = rememberBottomAxis(
-                        valueFormatter = { value, _ ->
-                            aggregatedData.getOrNull(value.toInt())?.label ?: ""
-                        }
-                    ),
-                    chartScrollSpec = rememberChartScrollSpec(isScrollEnabled = aggregatedData.size > 7)
-                )
-            }
-        }
+        LineChart(aggregatedData.toImmutableList())
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -254,28 +208,80 @@ fun AllTimeCoffeeChart(coffeeState: DaysCoffeesState) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Column chart for type distribution
-        ProvideChartStyle(rememberChartStyle()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-            ) {
-                Chart(
-                    chart = columnChart(),
-                    model = typeChartEntryModelProducer.getModel(),
-                    startAxis = rememberStartAxis(),
-                    bottomAxis = rememberBottomAxis(
-                        valueFormatter = { value, _ ->
-                            typeDistribution.getOrNull(value.toInt())?.type?.name?.take(3) ?: ""
-                        }
-                    )
-                )
-            }
-        }
+        ColumnChart(coffeeState)
 
         Spacer(modifier = Modifier.height(16.dp))
     }
+}
+
+@Composable
+private fun ColumnChart(coffeeState: DaysCoffeesState) {
+    // Create coffee type distribution data
+    val typeDistribution = CoffeeType.entries.map { coffeeType ->
+        val total = coffeeState.value.values.sumOf {
+            it.coffeeCountMap[coffeeType] ?: 0
+        }
+
+        CoffeeTypeCount(
+            type = coffeeType,
+            count = total
+        )
+    }.sortedByDescending { it.count }
+    val typeChartEntries = typeDistribution.mapIndexed { index, data ->
+        index to data.count
+    }.unzip()
+
+    val modelProducer = remember { CartesianChartModelProducer() }
+    LaunchedEffect(Unit) {
+        modelProducer.runTransaction {
+            columnSeries { series(x = typeChartEntries.first, y = typeChartEntries.second) }
+        }
+    }
+
+    // Column chart for type distribution
+    CartesianChartHost(
+        chart =
+            rememberCartesianChart(
+                rememberColumnCartesianLayer(),
+                startAxis = VerticalAxis.rememberStart(),
+                bottomAxis = HorizontalAxis.rememberBottom(
+                    valueFormatter = { _, value, _ ->
+                        typeDistribution.getOrNull(value.toInt())?.type?.name?.take(3) ?: ""
+                    }
+                ),
+            ),
+        modelProducer = modelProducer,
+        modifier = Modifier,
+    )
+}
+
+@Composable
+private fun LineChart(aggregatedData: ImmutableList<AggregatedData>) {
+    // Create chart entries
+    val chartEntries = aggregatedData.mapIndexed { index: Int, data: AggregatedData ->
+        index to data.totalCount
+    }.unzip()
+    val chartEntryModelProducer = remember { CartesianChartModelProducer() }
+    LaunchedEffect(Unit) {
+        chartEntryModelProducer.runTransaction {
+            lineSeries { series(x = chartEntries.first, y = chartEntries.second) }
+        }
+    }
+    // Line chart with Vico
+    CartesianChartHost(
+        chart =
+            rememberCartesianChart(
+                rememberLineCartesianLayer(),
+                startAxis = VerticalAxis.rememberStart(),
+                bottomAxis = HorizontalAxis.rememberBottom(
+                    valueFormatter = { _, value, _ ->
+                        aggregatedData.getOrNull(value.toInt())?.label ?: ""
+                    }
+                ),
+            ),
+        modelProducer = chartEntryModelProducer,
+        modifier = Modifier,
+    )
 }
 
 internal fun dailyAggregation(coffeeState: DaysCoffeesState): List<AggregatedData> =
@@ -302,43 +308,6 @@ internal fun monthlyAggregation(coffeeState: DaysCoffeesState): List<AggregatedD
             totalCount = typeCounts.values.sum(),
         ) to yearMonth
     }.sortedBy { it.second }.map { it.first }
-
-// Helper functions and classes
-
-@Composable
-private fun rememberChartStyle(): ChartStyle {
-    val onSurface = MaterialTheme.colorScheme.onSurface
-    val primary = MaterialTheme.colorScheme.primary
-    val surface = MaterialTheme.colorScheme.surface
-    return remember {
-        ChartStyle(
-            axis = ChartStyle.Axis(
-                axisLabelColor = onSurface,
-                axisGuidelineColor = onSurface.copy(alpha = 0.1f),
-                axisLineColor = onSurface.copy(alpha = 0.3f)
-            ),
-            columnChart = ChartStyle.ColumnChart(
-                listOf(
-                    LineComponent(
-                        color = primary.toArgb(),
-                        thicknessDp = 8f
-                    )
-                )
-            ),
-            lineChart = ChartStyle.LineChart(
-                lines = listOf(
-                    LineChart.LineSpec(
-                        lineColor = primary.toArgb(),
-                        lineBackgroundShader = null,
-                        pointSizeDp = 8f,
-                    )
-                )
-            ),
-            marker = ChartStyle.Marker(),
-            elevationOverlayColor = surface
-        )
-    }
-}
 
 data class WeeklyChartData(
     val date: LocalDate,
