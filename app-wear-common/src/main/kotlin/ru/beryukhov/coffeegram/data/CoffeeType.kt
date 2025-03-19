@@ -6,7 +6,7 @@ import ru.beryukhov.coffeegram.common.R
 
 interface CoffeeType {
     @get:StringRes val nameId: Int
-    @get:DrawableRes val iconId: Int
+    @get:DrawableRes val iconId: Int? // todo - nullable only for screenshot-testing bug
     val key: String
 }
 
