@@ -69,14 +69,16 @@ internal fun PagesContent() {
 fun CoffeeItem(c: CoffeeType, count: Int, modifier: Modifier = Modifier) {
     Chip(
         icon = {
-            Image(
-                painter = painterResource(id = c.iconId),
-                contentDescription = "",
+            c.iconId?.let {
+                Image(
+                    painter = painterResource(id = it),
+                    contentDescription = "",
 
-                modifier = Modifier
-                    .size(ChipDefaults.IconSize)
-                    .alpha(LocalContentAlpha.current)
-            )
+                    modifier = Modifier
+                        .size(ChipDefaults.IconSize)
+                        .alpha(LocalContentAlpha.current)
+                )
+            }
         },
         label = {
             Text(

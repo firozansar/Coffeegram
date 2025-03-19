@@ -3,6 +3,7 @@ package ru.beryukhov.coffeegram
 import kotlinx.datetime.LocalDate
 import repository.model.DbDayCoffee
 import ru.beryukhov.coffeegram.data.CoffeeType
+import ru.beryukhov.coffeegram.data.CoffeeTypeWithCount
 import ru.beryukhov.coffeegram.data.CoffeeTypes.Americano
 import ru.beryukhov.coffeegram.data.CoffeeTypes.Cappuccino
 import ru.beryukhov.coffeegram.data.CoffeeTypes.Chocolate
@@ -15,7 +16,6 @@ import ru.beryukhov.coffeegram.data.CoffeeTypes.Irish
 import ru.beryukhov.coffeegram.data.CoffeeTypes.Latte
 import ru.beryukhov.coffeegram.data.CoffeeTypes.Macchiato
 import ru.beryukhov.coffeegram.data.CoffeeTypes.Mocha
-import ru.beryukhov.coffeegram.data.CoffeeTypeWithCount
 import ru.beryukhov.coffeegram.data.DayCoffee
 import ru.beryukhov.coffeegram.data.withEmpty
 import ru.beryukhov.coffeegram.model.DaysCoffeesState
