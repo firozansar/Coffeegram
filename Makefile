@@ -13,6 +13,9 @@ autodetekt:
 testApp:
 	./gradlew :app:testDebugUnitTest $(params)
 
+uiBuild:
+	./gradlew :app:compileDebugAndroidTestKotlin $(params)
+
 buildApp:
 	./gradlew :app:assembleDebug $(params)
 
