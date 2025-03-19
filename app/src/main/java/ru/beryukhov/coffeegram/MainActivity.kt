@@ -23,7 +23,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.koin.compose.koinInject
 import ru.beryukhov.coffeegram.animations.TransitionSlot
-import ru.beryukhov.coffeegram.data.CoffeeType
+import ru.beryukhov.coffeegram.data.CoffeeTypes
 import ru.beryukhov.coffeegram.data.DAY_COFFEE_PATH
 import ru.beryukhov.coffeegram.data.DayCoffee
 import ru.beryukhov.coffeegram.data.START_ACTIVITY_PATH
@@ -97,8 +97,8 @@ private fun MainActivity.startWearableActivity() {
         // todo replace mock
         DayCoffee(
             mapOf(
-                CoffeeType.Cappuccino to 1,
-                CoffeeType.Americano to 2
+                CoffeeTypes.Cappuccino to 1,
+                CoffeeTypes.Americano to 2
             )
         )
     )

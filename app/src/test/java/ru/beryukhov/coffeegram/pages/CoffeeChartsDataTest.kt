@@ -1,7 +1,7 @@
 package ru.beryukhov.coffeegram.pages
 
 import kotlinx.datetime.LocalDate
-import ru.beryukhov.coffeegram.data.CoffeeType
+import ru.beryukhov.coffeegram.data.CoffeeTypes
 import ru.beryukhov.coffeegram.data.DayCoffee
 import ru.beryukhov.coffeegram.model.DaysCoffeesState
 import kotlin.test.Test
@@ -15,8 +15,8 @@ class CoffeeChartsDataTest {
             startOfWeek = LocalDate(2023, 1, 2),
             coffeeState = DaysCoffeesState(
                 value = mapOf(
-                    LocalDate(2023, 1, 2) to DayCoffee(mapOf(CoffeeType.Latte to 1, CoffeeType.Espresso to 2)),
-                    LocalDate(2023, 1, 3) to DayCoffee(mapOf(CoffeeType.Latte to 4)),
+                    LocalDate(2023, 1, 2) to DayCoffee(mapOf(CoffeeTypes.Latte to 1, CoffeeTypes.Espresso to 2)),
+                    LocalDate(2023, 1, 3) to DayCoffee(mapOf(CoffeeTypes.Latte to 4)),
                 )
             )
         )
@@ -46,9 +46,9 @@ class CoffeeChartsDataTest {
         val actualData = dailyAggregation(
             coffeeState = DaysCoffeesState(
                 value = mapOf(
-                    LocalDate(2022, 12, 31) to DayCoffee(mapOf(CoffeeType.Irish to 6)),
-                    LocalDate(2023, 1, 2) to DayCoffee(mapOf(CoffeeType.Latte to 1, CoffeeType.Espresso to 2)),
-                    LocalDate(2023, 1, 3) to DayCoffee(mapOf(CoffeeType.Latte to 4)),
+                    LocalDate(2022, 12, 31) to DayCoffee(mapOf(CoffeeTypes.Irish to 6)),
+                    LocalDate(2023, 1, 2) to DayCoffee(mapOf(CoffeeTypes.Latte to 1, CoffeeTypes.Espresso to 2)),
+                    LocalDate(2023, 1, 3) to DayCoffee(mapOf(CoffeeTypes.Latte to 4)),
                 )
             )
         )
@@ -67,9 +67,9 @@ class CoffeeChartsDataTest {
         val actualData = monthlyAggregation(
             coffeeState = DaysCoffeesState(
                 value = mapOf(
-                    LocalDate(2022, 8, 14) to DayCoffee(mapOf(CoffeeType.Frappe to 7)),
-                    LocalDate(2023, 1, 2) to DayCoffee(mapOf(CoffeeType.Latte to 1, CoffeeType.Espresso to 2)),
-                    LocalDate(2023, 2, 3) to DayCoffee(mapOf(CoffeeType.Latte to 4)),
+                    LocalDate(2022, 8, 14) to DayCoffee(mapOf(CoffeeTypes.Frappe to 7)),
+                    LocalDate(2023, 1, 2) to DayCoffee(mapOf(CoffeeTypes.Latte to 1, CoffeeTypes.Espresso to 2)),
+                    LocalDate(2023, 2, 3) to DayCoffee(mapOf(CoffeeTypes.Latte to 4)),
                 )
             )
         )

@@ -31,7 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import ru.beryukhov.coffeegram.data.CoffeeType
-import ru.beryukhov.coffeegram.data.CoffeeType.Cappuccino
+import ru.beryukhov.coffeegram.data.CoffeeTypes.Cappuccino
 
 @Composable
 fun CoffeeTypeItem(
@@ -44,13 +44,15 @@ fun CoffeeTypeItem(
     Row(
         modifier = modifier.padding(16.dp)
     ) {
-        Image(
-            painter = painterResource(id = coffeeType.iconId),
-            contentDescription = "",
-            modifier = Modifier
-                .size(48.dp)
-                .align(Alignment.CenterVertically)
-        )
+        coffeeType.iconId?.let {
+            Image(
+                painter = painterResource(id = it),
+                contentDescription = "",
+                modifier = Modifier
+                    .size(48.dp)
+                    .align(Alignment.CenterVertically)
+            )
+        }
         Spacer(Modifier.width(16.dp))
         Text(
             stringResource(coffeeType.nameId),
@@ -94,7 +96,7 @@ fun CoffeeTypeItem(
 private const val ZERO_WIDTH_CHAR = '\u200B'
 
 @Composable
-private fun RowScope.AnimatedCounter(count: Int) {
+internal fun RowScope.AnimatedCounter(count: Int) {
     count.toString()
         // For correct transitions when the digit count changes. Up to 999
         .padStart(3, ZERO_WIDTH_CHAR)

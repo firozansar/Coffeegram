@@ -44,6 +44,7 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 import ru.beryukhov.coffeegram.data.CoffeeType
+import ru.beryukhov.coffeegram.data.CoffeeTypes
 import ru.beryukhov.coffeegram.data.DayCoffee
 import ru.beryukhov.coffeegram.model.DaysCoffeesState
 import ru.beryukhov.date_time_utils.YearMonth
@@ -217,7 +218,7 @@ fun AllTimeCoffeeChart(coffeeState: DaysCoffeesState) {
 @Composable
 private fun ColumnChart(coffeeState: DaysCoffeesState) {
     // Create coffee type distribution data
-    val typeDistribution = CoffeeType.entries.map { coffeeType ->
+    val typeDistribution = CoffeeTypes.entries.map { coffeeType ->
         val total = coffeeState.value.values.sumOf {
             it.coffeeCountMap[coffeeType] ?: 0
         }

@@ -13,6 +13,9 @@ autodetekt:
 testApp:
 	./gradlew :app:testDebugUnitTest $(params)
 
+uiBuild:
+	./gradlew :app:compileDebugAndroidTestKotlin $(params)
+
 buildApp:
 	./gradlew :app:assembleDebug $(params)
 
@@ -67,3 +70,9 @@ generateFramework:
 
 buildHealth:
 	./gradlew buildHealth $(params)
+
+updateScreenshots:
+	./gradlew :app:updateDebugScreenshotTest --no-configuration-cache $(params)
+
+screenshotTest:
+	./gradlew :app:validateDebugScreenshotTest --no-configuration-cache $(params)

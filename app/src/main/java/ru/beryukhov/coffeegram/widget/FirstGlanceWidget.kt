@@ -218,13 +218,15 @@ private fun HorizontalWidget(
 
         )
         Spacer(GlanceModifier.width(padding).defaultWeight())
-        Image(
-            provider = ImageProvider(resId = coffeeTypeWithCount.coffee.iconId),
-            contentDescription = "",
-            modifier = GlanceModifier
-                .fillMaxHeight()
-                .size(36.dp)
-        )
+        coffeeTypeWithCount.coffee.iconId?.let {
+            Image(
+                provider = ImageProvider(resId = it),
+                contentDescription = "",
+                modifier = GlanceModifier
+                    .fillMaxHeight()
+                    .size(36.dp)
+            )
+        }
     }
 }
 

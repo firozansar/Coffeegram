@@ -5,6 +5,7 @@ import kotlinx.datetime.LocalDate
 import repository.CoffeeRepository
 import repository.model.DbDayCoffee
 import ru.beryukhov.coffeegram.data.CoffeeType
+import ru.beryukhov.coffeegram.data.CoffeeTypes
 import ru.beryukhov.coffeegram.data.DayCoffee
 import ru.beryukhov.coffeegram.model.DaysCoffeesState
 import ru.beryukhov.coffeegram.store_lib.Storage
@@ -25,11 +26,11 @@ internal fun List<DbDayCoffee>.toState(): DaysCoffeesState {
     val map = mutableMapOf<LocalDate, DayCoffee>()
     this.forEach {
         val date: LocalDate = LocalDate.parse(it.date)
-        val dayCoffee1 = map[date]?.let { map_date ->
-            val dayCoffee: MutableMap<CoffeeType, Int> = map_date.coffeeCountMap.toMutableMap()
-            dayCoffee[CoffeeType.valueOf(it.coffeeName)] = it.count
+        val dayCoffee1: Map<CoffeeType, Int> = map[date]?.let { mapDate ->
+            val dayCoffee: MutableMap<CoffeeType, Int> = mapDate.coffeeCountMap.toMutableMap()
+            dayCoffee[CoffeeTypes.valueOf(it.coffeeName)] = it.count
             dayCoffee
-        } ?: mapOf(CoffeeType.valueOf(it.coffeeName) to it.count)
+        } ?: mapOf(CoffeeTypes.valueOf(it.coffeeName) to it.count)
         map[date] = DayCoffee(dayCoffee1)
     }
     return DaysCoffeesState(map)
@@ -45,7 +46,7 @@ internal fun Map<LocalDate, DayCoffee>.toDaysCoffeesList(): List<DbDayCoffee> {
             list.add(
                 DbDayCoffee(
                     date = date,
-                    coffeeName = inner_entry.key.name,
+                    coffeeName = inner_entry.key.key,
                     count = inner_entry.value
                 )
             )

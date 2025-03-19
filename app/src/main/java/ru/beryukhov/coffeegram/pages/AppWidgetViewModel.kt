@@ -9,6 +9,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 import ru.beryukhov.coffeegram.data.CoffeeType
 import ru.beryukhov.coffeegram.data.CoffeeTypeWithCount
+import ru.beryukhov.coffeegram.data.CoffeeTypes
 import ru.beryukhov.coffeegram.data.DayCoffee
 import ru.beryukhov.coffeegram.data.withEmpty
 import ru.beryukhov.coffeegram.model.DaysCoffeesIntent
@@ -39,9 +40,9 @@ class AppWidgetViewModelStub : AppWidgetViewModel {
 }
 
 private val mockList: PersistentList<CoffeeTypeWithCount> = persistentListOf(
-    CoffeeTypeWithCount(CoffeeType.Cappuccino, 5),
-    CoffeeTypeWithCount(CoffeeType.Espresso, 3),
-    CoffeeTypeWithCount(CoffeeType.Macchiato, 2),
+    CoffeeTypeWithCount(CoffeeTypes.Cappuccino, 5),
+    CoffeeTypeWithCount(CoffeeTypes.Espresso, 3),
+    CoffeeTypeWithCount(CoffeeTypes.Macchiato, 2),
 )
 
 class AppWidgetViewModelImpl(
@@ -64,7 +65,7 @@ class AppWidgetViewModelImpl(
         val dayCoffee = dayCoffeeState.value[getCurrentDay()] ?: DayCoffee()
         val list = dayCoffee.coffeeCountMap.withEmpty().toList()
             .sortedByDescending { it.count }
-        val emptyListMock = listOf(CoffeeTypeWithCount(CoffeeType.Cappuccino, 0))
+        val emptyListMock = listOf(CoffeeTypeWithCount(CoffeeTypes.Cappuccino, 0))
         return list.toPersistentList()
     }
 

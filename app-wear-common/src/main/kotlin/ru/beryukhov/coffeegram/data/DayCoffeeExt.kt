@@ -5,14 +5,14 @@ import com.google.android.gms.wearable.DataMap
 fun DayCoffee.toDataMap(map: DataMap) {
     map.putIntegerArrayList(
         KEY,
-        ArrayList(coffeeCountMap.entries.sortedBy { it.key.ordinal }.map { it.value })
+        ArrayList(coffeeCountMap.entries.sortedBy { it.key.key }.map { it.value })
     ) // Fragile
 }
 
 fun ArrayList<Int>.toDayCoffee(): DayCoffee {
     val m = mutableMapOf<CoffeeType, Int>()
     this.forEachIndexed { index, i ->
-        m[CoffeeType.values()[index]] = i
+        m[CoffeeTypes.entries[index]] = i
     }
     return DayCoffee(coffeeCountMap = m) // Fragile // todo test to and from
 }
