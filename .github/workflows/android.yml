@@ -32,5 +32,7 @@ jobs:
       run: make testApp
     - name: Build App Gradle
       run: make buildApp
+    - name: Screenshot Test
+      run: make screenshotTest
     - name: Build Wear Gradle
       run: make buildWear
