@@ -102,7 +102,7 @@ kotlinx-immutableCollections = "org.jetbrains.kotlinx:kotlinx-collections-immuta
 vico-multiplatform = { module = "com.patrykandpatrick.vico:multiplatform", version.ref = "vico" }
 vico-multiplatform-m3 = { module = "com.patrykandpatrick.vico:multiplatform-m3", version.ref = "vico" }
 
-lottie-compose = "com.airbnb.android:lottie-compose:6.6.3" # https://github.com/airbnb/lottie-android
+lottie-compose = "com.airbnb.android:lottie-compose:6.6.4" # https://github.com/airbnb/lottie-android
 
 ###
 
