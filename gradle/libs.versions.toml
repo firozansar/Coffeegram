@@ -3,7 +3,7 @@ targetSdk = "34"
 compileSdk = "35"
 minSdk = "26"
 
-kotlin = "2.1.20-RC3" # https://github.com/JetBrains/kotlin/releases
+kotlin = "2.1.20" # https://github.com/JetBrains/kotlin/releases
 compose = "1.7.8" # https://developer.android.com/jetpack/androidx/releases/compose-ui
 jetbrainsCompose = "1.7.3" # https://github.com/JetBrains/compose-multiplatform/releases
 
@@ -102,7 +102,7 @@ kotlinx-immutableCollections = "org.jetbrains.kotlinx:kotlinx-collections-immuta
 vico-multiplatform = { module = "com.patrykandpatrick.vico:multiplatform", version.ref = "vico" }
 vico-multiplatform-m3 = { module = "com.patrykandpatrick.vico:multiplatform-m3", version.ref = "vico" }
 
-lottie-compose = "com.airbnb.android:lottie-compose:6.6.3" # https://github.com/airbnb/lottie-android
+lottie-compose = "com.airbnb.android:lottie-compose:6.6.4" # https://github.com/airbnb/lottie-android
 
 ###
 
