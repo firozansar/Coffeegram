@@ -6,33 +6,31 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import org.koin.android.ext.android.inject
+import com.arkivanov.decompose.defaultComponentContext
+import org.koin.android.ext.android.get
 import ru.beryukhov.coffeegram.animations.newSplashTransition
-import ru.beryukhov.coffeegram.model.DaysCoffeesStore
-import ru.beryukhov.coffeegram.model.NavigationStore
-import ru.beryukhov.coffeegram.model.ThemeStore
+import ru.beryukhov.coffeegram.components.DefaultRootComponent
 import ru.beryukhov.coffeegram.pages.LandingPage
+import ru.beryukhov.coffeegram.screens.RootScreen
 
 class MainActivity : ComponentActivity() {
 
-    private val navigationStore: NavigationStore by inject()
-    private val daysCoffeesStore: DaysCoffeesStore by inject()
-    private val themeStore: ThemeStore by inject()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val rootComponent = DefaultRootComponent(
+            defaultComponentContext(),
+            themeStore = get(),
+            daysCoffeesStore = get(),
+        )
         setContent {
             val transition = newSplashTransition()
             Box {
                 LandingPage(
                     modifier = Modifier.alpha(transition.splashAlpha),
                 )
-                PagesContent(
+                RootScreen(
+                    rootComponent,
                     modifier = Modifier.alpha(transition.contentAlpha),
-                    topPadding = transition.contentTopPadding,
-                    navigationStore = navigationStore,
-                    daysCoffeesStore = daysCoffeesStore,
-                    themeStore = themeStore,
                 )
             }
         }

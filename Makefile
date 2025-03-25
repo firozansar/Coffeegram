@@ -58,6 +58,8 @@ unsafe_clear_branches:
 runDesktop:
 	./gradlew run $(params)
 
+runHot:
+	./gradlew runHot --no-configuration-cache $(params)
 
 runWasm:
 	./gradlew :cmp-common:wasmJsBrowserDevelopmentRun --no-configuration-cache $(params)

@@ -4,13 +4,13 @@ import kotlinx.datetime.LocalDate
 import repository.model.DbDayCoffee
 import ru.beryukhov.coffeegram.data.Americano
 import ru.beryukhov.coffeegram.data.Cappuccino
-import ru.beryukhov.coffeegram.data.CoffeeType
 import ru.beryukhov.coffeegram.data.CommonCoffee
 import ru.beryukhov.coffeegram.data.DayCoffee
 import ru.beryukhov.coffeegram.data.Latte
+import ru.beryukhov.coffeegram.model.CoffeeTypeWithCount
 import ru.beryukhov.coffeegram.model.DaysCoffeesState
 import ru.beryukhov.coffeegram.model.changeCoffeeCount
-import ru.beryukhov.coffeegram.pages.withEmpty
+import ru.beryukhov.coffeegram.model.withEmpty
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -135,16 +135,16 @@ class DataMappingTest {
 
     @Test
     fun withEmptyTest() {
-        val map = mapOf<CoffeeType, Int>(
+        val map = mapOf(
             Cappuccino to 2,
             Latte to 3
         )
         val actual = map.withEmpty()
         val expected = listOf(
-            Latte to 3,
-            Cappuccino to 2,
-            Americano to 0,
-            CommonCoffee to 0
+            CoffeeTypeWithCount(Latte, 3),
+            CoffeeTypeWithCount(Cappuccino, 2),
+            CoffeeTypeWithCount(Americano, 0),
+            CoffeeTypeWithCount(CommonCoffee, 0),
         )
         assertEquals(expected, actual)
     }
