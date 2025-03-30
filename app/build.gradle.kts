@@ -85,6 +85,7 @@ android {
 dependencies {
 
     implementation(projects.repository)
+    implementation(projects.repositoryRoom)
     implementation(projects.appWearCommon)
 
     implementation(libs.core.coreKtx)
