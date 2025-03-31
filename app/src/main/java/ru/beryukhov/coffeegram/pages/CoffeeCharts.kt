@@ -19,7 +19,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.patrykandpatrick.vico.multiplatform.cartesian.CartesianChartHost
@@ -46,6 +45,7 @@ import kotlinx.datetime.toLocalDateTime
 import ru.beryukhov.coffeegram.data.CoffeeType
 import ru.beryukhov.coffeegram.data.CoffeeTypes
 import ru.beryukhov.coffeegram.data.DayCoffee
+import ru.beryukhov.coffeegram.data.printableText
 import ru.beryukhov.coffeegram.model.DaysCoffeesState
 import ru.beryukhov.date_time_utils.YearMonth
 
@@ -126,7 +126,7 @@ internal fun weeklyChartData(
     coffeeState: DaysCoffeesState
 ) = (0..6).map { dayOffset ->
     val date = startOfWeek.plus(DatePeriod(days = dayOffset))
-    val dayCoffee = coffeeState.value[date] ?: DayCoffee()
+    val dayCoffee = coffeeState.coffees[date] ?: DayCoffee()
     val totalForDay = dayCoffee.coffeeCountMap.values.sum()
 
     WeeklyChartData(
@@ -152,7 +152,7 @@ internal fun entries(weekData: List<WeeklyChartData>): Pair<List<Int>, List<Int>
 @Composable
 fun AllTimeCoffeeChart(coffeeState: DaysCoffeesState) {
     // Only process if we have data
-    if (coffeeState.value.isEmpty()) {
+    if (coffeeState.coffees.isEmpty()) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -164,7 +164,7 @@ fun AllTimeCoffeeChart(coffeeState: DaysCoffeesState) {
     }
 
     // Get date range for all available data
-    val dates = coffeeState.value.keys
+    val dates = coffeeState.coffees.keys
     val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
     val minDate = dates.minOrNull() ?: today
     val maxDate = dates.maxOrNull() ?: today
@@ -219,7 +219,7 @@ fun AllTimeCoffeeChart(coffeeState: DaysCoffeesState) {
 private fun ColumnChart(coffeeState: DaysCoffeesState) {
     // Create coffee type distribution data
     val typeDistribution = CoffeeTypes.entries.map { coffeeType ->
-        val total = coffeeState.value.values.sumOf {
+        val total = coffeeState.coffees.values.sumOf {
             it.coffeeCountMap[coffeeType] ?: 0
         }
 
@@ -239,7 +239,7 @@ private fun ColumnChart(coffeeState: DaysCoffeesState) {
         }
     }
 
-    val names = typeDistribution.map { stringResource(it.type.nameId) }
+    val names = typeDistribution.map { printableText(it.type.localizedName) }
 
     // Column chart for type distribution
     CartesianChartHost(
@@ -289,7 +289,7 @@ private fun LineChart(aggregatedData: ImmutableList<AggregatedData>) {
 }
 
 internal fun dailyAggregation(coffeeState: DaysCoffeesState): List<AggregatedData> =
-    coffeeState.value.map { (date, dayCoffee) ->
+    coffeeState.coffees.map { (date, dayCoffee) ->
         AggregatedData(
             label = "${date.month.name.take(3)} ${date.dayOfMonth}",
             totalCount = dayCoffee.coffeeCountMap.values.sum(),
@@ -297,7 +297,7 @@ internal fun dailyAggregation(coffeeState: DaysCoffeesState): List<AggregatedDat
     }.sortedBy { it.second }.map { it.first }
 
 internal fun monthlyAggregation(coffeeState: DaysCoffeesState): List<AggregatedData> =
-    coffeeState.value.entries.groupBy { entry ->
+    coffeeState.coffees.entries.groupBy { entry ->
         YearMonth(entry.key.year, entry.key.month)
     }.map { (yearMonth, entries) ->
         val typeCounts = mutableMapOf<CoffeeType, Int>()

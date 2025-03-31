@@ -2,7 +2,6 @@ package ru.beryukhov.coffeegram.wear
 
 import android.content.Context
 import android.content.Intent
-import androidx.core.content.ContextCompat.startActivity
 import com.google.android.gms.wearable.DataEvent
 import com.google.android.gms.wearable.DataEventBuffer
 import com.google.android.gms.wearable.DataMapItem
@@ -20,8 +19,7 @@ interface MessageHandler {
 class MessageHandlerImpl(private val context: Context) : MessageHandler {
     override fun onMessageReceived(messageEvent: MessageEvent) {
         when (messageEvent.path) {
-            START_ACTIVITY_PATH -> startActivity(
-                context,
+            START_ACTIVITY_PATH -> context.startActivity(
                 Intent(context, WearActivity::class.java)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                 null
