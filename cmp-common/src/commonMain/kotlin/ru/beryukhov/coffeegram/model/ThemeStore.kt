@@ -1,19 +1,20 @@
 package ru.beryukhov.coffeegram.model
 
-import ru.beryukhov.coffeegram.app_ui.isCupertinoDefault
-import ru.beryukhov.coffeegram.store_lib.PersistentStore
 import ru.beryukhov.coffeegram.store_lib.Storage
+import ru.beryukhov.coffeegram.store_lib.StoreImpl
 
-class ThemeStore(storage: Storage<ThemeState>) : PersistentStore<ThemeIntent, ThemeState>(
+class ThemeStore(storage: Storage<ThemeState>) : StoreImpl<ThemeIntent, ThemeState>(
     initialState = ThemeStateDefault,
     storage = storage
 ) {
-    override fun handleIntent(intent: ThemeIntent): ThemeState {
+    override fun ThemeState.handleIntent(intent: ThemeIntent): ThemeState {
         return when (intent) {
-            ThemeIntent.SetDarkIntent -> state.value.copy(useDarkTheme = DarkThemeState.DARK)
-            ThemeIntent.SetLightIntent -> state.value.copy(useDarkTheme = DarkThemeState.LIGHT)
-            ThemeIntent.SetSystemIntent -> state.value.copy(useDarkTheme = DarkThemeState.SYSTEM)
-            is ThemeIntent.SetCupertinoIntent -> state.value.copy(isCupertino = intent.enabled)
+            ThemeIntent.SetDarkIntent -> copy(useDarkTheme = DarkThemeState.DARK)
+            ThemeIntent.SetLightIntent -> copy(useDarkTheme = DarkThemeState.LIGHT)
+            ThemeIntent.SetSystemIntent -> copy(useDarkTheme = DarkThemeState.SYSTEM)
+            is ThemeIntent.SetCupertinoIntent -> copy(isCupertino = isCupertino?.let { intent.enabled })
+            is ThemeIntent.SetDynamicIntent -> copy(isDynamic = isDynamic?.let { intent.enabled })
+            is ThemeIntent.SetSummerIntent -> copy(isSummer = isSummer?.let { intent.enabled })
         }
     }
 }
@@ -23,11 +24,20 @@ sealed interface ThemeIntent {
     object SetLightIntent : ThemeIntent
     object SetSystemIntent : ThemeIntent
     data class SetCupertinoIntent(val enabled: Boolean) : ThemeIntent
+    data class SetDynamicIntent(val enabled: Boolean) : ThemeIntent
+    data class SetSummerIntent(val enabled: Boolean) : ThemeIntent
 }
 
-data class ThemeState(val useDarkTheme: DarkThemeState, val isCupertino: Boolean)
+data class ThemeState(
+    val useDarkTheme: DarkThemeState,
+    val isCupertino: Boolean?,
+    val isDynamic: Boolean?,
+    val isSummer: Boolean?,
+)
 
-val ThemeStateDefault get() = ThemeState(DarkThemeState.SYSTEM, isCupertino = isCupertinoDefault())
+// if val is null - this config is unavailable on this platform
+// otherwise - this config sets default value
+expect val ThemeStateDefault: ThemeState
 
 enum class DarkThemeState {
     DARK,

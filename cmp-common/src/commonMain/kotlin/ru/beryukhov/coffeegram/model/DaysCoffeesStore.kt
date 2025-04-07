@@ -4,26 +4,26 @@ import kotlinx.datetime.LocalDate
 import ru.beryukhov.coffeegram.data.CoffeeType
 import ru.beryukhov.coffeegram.data.DayCoffee
 import ru.beryukhov.coffeegram.repository.CoffeeStorage
-import ru.beryukhov.coffeegram.store_lib.PersistentStore
 import ru.beryukhov.coffeegram.store_lib.Store
+import ru.beryukhov.coffeegram.store_lib.StoreImpl
 
 interface DaysCoffeesStore : Store<DaysCoffeesIntent, DaysCoffeesState>
 
 // todo make internal after apps merge will be finished
 class DaysCoffeesStoreImpl(coffeeStorage: CoffeeStorage) : DaysCoffeesStore,
-    PersistentStore<DaysCoffeesIntent, DaysCoffeesState>(
+    StoreImpl<DaysCoffeesIntent, DaysCoffeesState>(
         initialState = DaysCoffeesState(),
         storage = coffeeStorage
     ) {
 
-    override fun handleIntent(intent: DaysCoffeesIntent): DaysCoffeesState {
+    override fun DaysCoffeesState.handleIntent(intent: DaysCoffeesIntent): DaysCoffeesState {
         return when (intent) {
             is DaysCoffeesIntent.PlusCoffee -> increaseCoffee(intent.localDate, intent.coffeeType)
             is DaysCoffeesIntent.MinusCoffee -> decreaseCoffee(intent.localDate, intent.coffeeType)
         }
     }
 
-    private fun increaseCoffee(localDate: LocalDate, coffeeType: CoffeeType): DaysCoffeesState {
+    private fun DaysCoffeesState.increaseCoffee(localDate: LocalDate, coffeeType: CoffeeType): DaysCoffeesState {
         return putCoffeeCount(
             localDate = localDate,
             coffeeType = coffeeType,
@@ -31,7 +31,7 @@ class DaysCoffeesStoreImpl(coffeeStorage: CoffeeStorage) : DaysCoffeesStore,
         )
     }
 
-    private fun decreaseCoffee(localDate: LocalDate, coffeeType: CoffeeType): DaysCoffeesState {
+    private fun DaysCoffeesState.decreaseCoffee(localDate: LocalDate, coffeeType: CoffeeType): DaysCoffeesState {
         return putCoffeeCount(
             localDate = localDate,
             coffeeType = coffeeType,
@@ -39,14 +39,18 @@ class DaysCoffeesStoreImpl(coffeeStorage: CoffeeStorage) : DaysCoffeesStore,
         )
     }
 
-    private fun getCoffeeOrNull(localDate: LocalDate, coffeeType: CoffeeType): Int? {
-        return state.value.coffees[localDate]?.coffeeCountMap?.get(coffeeType)
+    private fun DaysCoffeesState.getCoffeeOrNull(localDate: LocalDate, coffeeType: CoffeeType): Int? {
+        return coffees[localDate]?.coffeeCountMap?.get(coffeeType)
     }
 
-    private fun putCoffeeCount(localDate: LocalDate, coffeeType: CoffeeType, count: Int): DaysCoffeesState {
+    private fun DaysCoffeesState.putCoffeeCount(
+        localDate: LocalDate,
+        coffeeType: CoffeeType,
+        count: Int
+    ): DaysCoffeesState {
         return DaysCoffeesState(
             changeCoffeeCount(
-                oldValue = state.value.coffees,
+                oldValue = coffees,
                 localDate = localDate,
                 coffeeType = coffeeType,
                 count = count
