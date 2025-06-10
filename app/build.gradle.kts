@@ -25,7 +25,7 @@ android {
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = (100000000 + Instant.now().toEpochMilli() / 1000).toInt()
-        versionName = "1.6"
+        versionName = "1.7"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -111,6 +111,7 @@ dependencies {
     implementation(libs.glance.appwidget.preview)
 
     implementation(libs.google.maps.compose)
+    implementation(libs.google.maps.utils)
 
     implementation(libs.ktor.client.okhttp)
     implementation(libs.ktor.logging)

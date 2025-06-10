@@ -81,7 +81,8 @@ class FirstGlanceWidget : GlanceAppWidget(errorUiLayout = R.layout.layout_widget
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val viewModel: AppWidgetViewModelImpl by inject()
         provideContent {
-            WidgetContent(viewModel)
+            // todo widgets are broken because of compose resources
+            // WidgetContent(viewModel)
         }
     }
 
